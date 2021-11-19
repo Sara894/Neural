@@ -52,11 +52,30 @@ public:
 	}
 
 	//одна из самых важных функций, SetLayers
-	void SetLayers(int n, int* p)//массив size
+	void setLayers(int n, int* p)//массив size
 	{
 		srand(time(0));//генерируем рандомные числа
 		layers = n;
 		neurons = new neuron * [n];
+		weights = new double** [n - 1];
+		size = new int[n];
+		for (int i = 0; i < n; i++)
+		{
+			size[i] = p[i];
+			neurons[i] = new neuron[p[i]];
+			if (i < n - 1)
+			{
+				weights[i] = new double* [p[i]];
+				for (int j = 0; j < p[i]; j++)
+				{
+					weights[i][j] = new double[p[i + 1]];
+					for (int k = 0; k < p[i + 1]; k++)
+					{
+						weights[i][j][k] = ((rand() % 100) * 0.01) / size[i];
+					}
+				}
+			}
+		}
 
 
 
