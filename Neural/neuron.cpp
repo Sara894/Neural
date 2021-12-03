@@ -1,4 +1,4 @@
-#include <fstream>
+ #include <fstream>
 #include <thread>//сетка многопоточная будет
 #include <random>//случайные числа
 #include <time.h>
@@ -76,9 +76,23 @@ public:
 				}
 			}
 		}
+	}
+	
+	//принимает входные значения нейросети
+	void setInput(double* p)
+	{
+		for (int i = 0; i < size[0]; i++)//значения от 0 до 255 - градация серого
+		{
+			neurons[0][i].value = p[i];
+		}
+	}
 
-
-
+	//вспомогательная функция
+	void Show()
+	{
+		setlocale(LC_ALL, "ru");
+		cout << "Количество ядер процессора: " << endl;
+		cout << "Нейронная сеть имеет архитектуру: "
 	}
 
 };
