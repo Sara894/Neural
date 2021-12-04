@@ -133,4 +133,17 @@ public:
 		}
 	}
 
+	//вспомогательная функция для функции ForwardFeed
+	void ForwardFeeder(int LayerNumber, int start, int stop)
+	{
+		for (int j = start; j < stop; j++)
+		{
+			for (int k = 0; k < size[LayerNumber - 1]; k++)
+			{
+				neurons[LayerNumber][j].value += neurons[LayerNumber - 1][k].value * weights[LayerNumber - 1][k][j];
+			}
+			neurons[LayerNumber][j].act();
+		}
+	}
+
 };
