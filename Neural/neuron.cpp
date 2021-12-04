@@ -88,11 +88,39 @@ public:
 	}
 
 	//вспомогательная функция
+	//она будет помогать мне искать ошибки в нейросети
 	void Show()
 	{
 		setlocale(LC_ALL, "ru");
-		cout << "Количество ядер процессора: " << endl;
-		cout << "Нейронная сеть имеет архитектуру: "
+		cout << "Количество ядер процессора: " <<thread::hardware_concurrency << endl;
+		cout << "Нейронная сеть имеет архитектуру: ";
+		for (int i = 0; i < layers; i++)
+		{
+			cout << size[i];
+			if (i < layers - 1)
+			{
+				cout << " - ";
+			}
+		}
+		cout << endl;
+		for (int i = 0; i < layers; i++)
+		{
+			cout << "\n #Слой " << i + 1 <<"\n\n";
+			for (int j = 0; j < size[i]; j++)
+			{
+				cout << "Нейрон #" << j + 1 << ":\n";
+				cout << "Значение: " << neurons[i][j].value << endl;
+				if (i < layers - 1)
+				{
+					cout << "Веса : \n";
+					for (int k = 0; k < size[i + 1]; k++)
+					{
+						cout << "#" << k + 1 << ":  ";
+						cout << weights[i][j][k] << endl;
+					}
+				}
+			}
+		}
 	}
 
 };
