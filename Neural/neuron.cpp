@@ -123,4 +123,14 @@ public:
 		}
 	}
 
+	//очистка слоев
+	void LayersCleaner(int LayerNumber, int start, int stop).//две переменные нужны чтобы разные потоки чистили разные переменные значений
+	{
+		srand(time(0));
+		for (int i = start; i < stop; i++)
+		{
+			neurons[LayerNumber][i].value = 0;
+		}
+	}
+
 };
