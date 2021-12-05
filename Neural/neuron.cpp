@@ -29,7 +29,7 @@ public:
 	//3 -- номер связи нейрона со следующим слоем
 	int* size;//динамический массив,
 	//содержит колво нейронов в каждом слое
-	int theadsNum;//количество потоков
+	int threadsNum;//количество потоков
 	//производная сигмоиды
 	double sigm_pro(double x)
 	{
@@ -164,11 +164,10 @@ public:
 			{
 				//выполнение очистки слоя первым ядром и вторым ядром
 				thread th1([&]() {
-					LayersCleaner(i, 0, int(floor(size[i] / 2)))
-
+					LayersCleaner(i, 0, int(floor(size[i] / 2)));
 					});
 				thread th2([&]() {
-					LayersCleaner(i, 0, int(floor(size[i] / 2)), size[i]);
+					LayersCleaner(i, int(floor(size[i] / 2)), size[i]);
 					});
 				th1.join();
 				th2.join();
@@ -190,7 +189,7 @@ public:
 						LayersCleaner(i, 0, size[i]);
 						});
 					thread th2([&]() {
-						LayersCleaner(i, 0, int(floor(size[i] / 2)), size[i]);
+						LayersCleaner(i, int(floor(size[i] / 2)), size[i]);
 						});
 					th1.join();
 					th2.join();
@@ -225,10 +224,10 @@ public:
 				}
 
 				if (threadsNum == 2) {
-					thread.th1([&]() {
+					thread th1([&]() {
 						ForwardFeeder(i, 0, int(floor(size[i] / 2)));
 						});
-					thread.th2([&]() {
+					thread th2([&]() {
 						ForwardFeeder(i, int(floor(size[i] / 2)), size[i]);
 						});
 					th1.join();
@@ -238,11 +237,11 @@ public:
 				if (threadsNum == 4)
 				{
 					if (size[i] == 2 || size[i] == 3) {
-						thread.th1([&]() {
+						thread th1([&]() {
 							ForwardFeeder(i, 0, int(floor(size[i] / 2)));
 							});
-						thread.th2([&]() {
-							ForwardFeeder(i, int(floor(size[i] / 2, size[i])));
+						thread th2([&]() {
+							ForwardFeeder(i, int(floor(size[i] / 2)), size[i]);
 							});
 						th1.join();
 						th2.join();
@@ -298,7 +297,7 @@ public:
 			for (int j = start; j < stop; j++) {
 				double error = 0.0;
 				for (int k = 0; k < size[LayerNumber + 1]; k++) {
-					error += neurons[LayerNumber + 1][k].error * weights[LayerNumber][j][k]
+					error += neurons[LayerNumber + 1][k].error * weights[LayerNumber][j][k];
 				}
 				neurons[LayerNumber][j].error = error;
 			}
@@ -434,7 +433,7 @@ public:
 			if (i < layers - 1) {
 				for (int j = 0; j < size[i]; j++) {
 					for (int k = 0; k < size[i + 1]; k++) {
-						fout << weights[i][j][k]<<" ";
+						fout << weights[i][j][k] << " ";
 
 					}
 				}
