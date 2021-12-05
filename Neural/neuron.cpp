@@ -280,4 +280,29 @@ public:
 		return prediction;
 	}
 
+	//считает ошибку для каждого нейрона
+	void ErrorCounter(int LayerNumber, int start, int stop, double prediction, double rresult, double lr)
+	{
+		if (LayerNumber == layers - 1) {
+			for (int j = start; j < stop; j++)
+			{
+				if (j != int(rresult)) {
+					neurons[LayerNumber][j].error = -(neurons[LayerNumber][j].value);
+				}
+				else {
+					neurons[LayerNumber][j].error = 1.0 - (neurons[LayerNumber][j].value);
+				}
+			}
+		}
+		else {
+			for (int j = start; j < stop; j++) {
+				double error = 0.0;
+				for (int k = 0; k < size[LayerNumber + 1]; k++) {
+					error += neurons[LayerNumber + 1][k].error * weights[LayerNumber][j][k]
+				}
+				neurons[LayerNumber][j].error = error;
+			}
+		}
+	}
+
 };
