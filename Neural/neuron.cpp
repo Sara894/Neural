@@ -475,7 +475,9 @@ public:
 int main() {
 	srand(time(0));
 	setlocale(LC_ALL, "Russian");
-	ifstream fin;
+	ifstream fin("lib.txt");
+	if (!fin.is_open()) // если файл не открыт
+				cout << "Файл не может быть открыт!\n"; // сообщить об этом
 	ofstream fout;
 	const int l = 4;//количество слоев нейронной сети
 	const int input_l = 4096;//64*64 обрабатываем картинку 64 на 64 
@@ -499,7 +501,7 @@ int main() {
 
 	if (to_study) {
 		nn.setLayers(1, size);
-		for (int e = 0; ra / n * 100 < 100; e++) {
+		for (int e = 0; ra / n * 100 < 20; e++) {
 			fout << "Epoch # " << e << endl;
 			double epoch_start = clock();
 			ra = 0;
