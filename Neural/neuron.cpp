@@ -305,4 +305,14 @@ public:
 		}
 	}
 
+	//обновляет веса по определенному правилу
+	void WeightsUpdater(int start, int stop, int LayerNum, int lr) {
+		int i = LayerNum;
+		for (int j = start; j < stop; j++) {
+			for (int k = 0; k < size[i + 1]; k++) {
+				weights[i][j][k] += lr * neurons[i + 1][k].error * sigm_pro(neurons[i + 1][k].value) * neurons[i][j].value;
+			}
+		}
+	}
+
 };
