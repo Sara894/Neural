@@ -548,12 +548,12 @@ int main() {
 			cout << "Веса сохранены!";
 		}
 	}
+	else {
+		nn.setLayersNotStudy(1, size, "perfect_weights.txt");
+	}
 
 
-
-
-
-
+	fin.close();
 	return 0;
 
 }
