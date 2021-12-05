@@ -552,6 +552,18 @@ int main() {
 		nn.setLayersNotStudy(1, size, "perfect_weights.txt");
 	}
 
+	cout << "Начать тест:(1/10)   ";
+	bool to_start_test = 0;
+	cin >> to_start_test;
+	if (to_start_test) {
+		fin.open("test.txt");
+		for (int i = 0; i < input_l; i++) {
+			fin >> input[i];
+		}
+		nn.setInput(input);
+		result = nn.ForwardFeed();
+		cout << "Я считаю, что это буква " << char(result + 65) << "\n\n";
+	}
 
 	fin.close();
 	return 0;
