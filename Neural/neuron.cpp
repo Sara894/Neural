@@ -444,5 +444,93 @@ public:
 		fout.close();
 		return 1;
 	}
-
 };
+
+
+//главная функция
+
+int main() {
+	srand(time(0));
+	setlocale(LC_ALL, "Russian");
+	ifstream fin;
+	ofstream fout;
+	const int l = 4;//количество слоев нейронной сети
+	const int input_l = 4096;//64*64 обрабатываем картинку 64 на 64 
+	int size[l] = { input_l, 64, 32, 26 };// 26 количество букв в английском алфавите
+
+	network nn;//создаем объект класса нетврк
+
+	double input[input_l];
+	char rresult;// right result
+	double result;//номер нейрона с максимальным значением 
+	double ra = 0;// right answer количество правильных ответов за эпоху
+	int maxra = 0;// max right answer максимальное количество правильных ответов за эпоху
+	int maxraepoch = 0;
+	const int n = 52;//количество картинок для обучения нейросети
+	bool to_study = 0;//ввод с клавы -- надо обучать нейросеть или нет?
+
+	cout << "Производить обучение или нет? ";
+	cin >> to_study;
+
+	double time = 0;
+
+	if (to_study) {
+		nn.setLayers(1, size);
+		for (int e = 0; ra / n * 100 < 100; e++) {
+			fout << "Epoch # " << e << endl;
+			double epoch_start = clock();
+			ra = 0;
+			double w_delta = 0;
+
+			fin.open("lib.txt");
+
+			for (int i = 0; i < n; i++) {
+				double start = clock();
+				for (int j = 0; j < input_l; j++) {
+					fin >> input[j];
+				}
+				fin >> rresult;
+				double stop = clock();
+				time += stop - start;
+				rresult -= 65;
+				nn.setInput(input);
+
+				result = nn.ForwardFeed();
+				if (result == rresult) {
+					cout << "Угадал букву " << char(rresult + 65) << "\t\t\t****" << endl;
+					ra++;
+				}
+				else {
+					nn.BackPropogation(result, rresult, 0.6);
+				}
+			}
+
+			fin.close();
+			double epoch_stop = clock();
+			cout << "Right answers: " << ra / n * 100 << " % \t Max RA: " << double(maxra) / n * 100 << " ( epoch " << maxraepoch << " ) " << endl;
+			cout << "Time needed to fin: " << time / 100 << " ms\t\t\tEpoch time: " << epoch_stop - epoch_start << endl;
+			time = 0;
+
+			if (ra > maxra) {
+				maxra = ra;
+				maxraepoch = e;
+			}
+
+			if (maxraepoch < e - 250) {
+				maxra = 0;
+			}
+		}
+
+		if (nn.SaveWeights()) {
+			cout << "Веса сохранены!";
+		}
+	}
+
+
+
+
+
+
+	return 0;
+
+}
