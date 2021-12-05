@@ -124,7 +124,7 @@ public:
 	}
 
 	//очистка слоев
-	void LayersCleaner(int LayerNumber, int start, int stop).//две переменные нужны чтобы разные потоки чистили разные переменные значений
+	void LayersCleaner(int LayerNumber, int start, int stop)//две переменные нужны чтобы разные потоки чистили разные переменные значений
 	{
 		srand(time(0));
 		for (int i = start; i < stop; i++)
@@ -144,6 +144,140 @@ public:
 			}
 			neurons[LayerNumber][j].act();
 		}
+	}
+
+	double ForwardFeed()
+	{
+		setlocale(LC_ALL, "ru");
+		for (int i = 1; i < layers; i++)
+		{
+			if (threadsNum == 1)
+			{
+				//выполнение очистки слоя первым ядром
+				thread th1([&]() {
+					LayersCleaner(i, 0, size[i]);
+					});
+				th1.join();
+			}
+
+			if (threadsNum == 2)
+			{
+				//выполнение очистки слоя первым ядром и вторым ядром
+				thread th1([&]() {
+					LayersCleaner(i, 0, int(floor(size[i] / 2)))
+
+					});
+				thread th2([&]() {
+					LayersCleaner(i, 0, int(floor(size[i] / 2)), size[i]);
+					});
+				th1.join();
+				th2.join();
+			}
+
+			if (threadsNum == 4) {
+				if (size[i] == 1)
+				{
+					cout << "Выполняю очистку слоя первым ядром...\n";
+					thread th1([&]() {
+						LayersCleaner(i, 0, size[i]);
+						});
+					th1.join();
+				}
+
+				if (size[i] == 2 || size[i] == 3) {
+					cout << "Выполняю очистку слоя двумя ядром...\n";
+					thread th1([&]() {
+						LayersCleaner(i, 0, size[i]);
+						});
+					thread th2([&]() {
+						LayersCleaner(i, 0, int(floor(size[i] / 2)), size[i]);
+						});
+					th1.join();
+					th2.join();
+				}
+
+				if (size[i] >= 4)
+				{
+					cout << "4 ядра это не про мой комп)))" << endl;
+					int start1 = 0;
+					int stop1 =  int(size[i] / 4);
+					int start2 = int(size[i] / 4);
+					int stop2 =  int(size[i] / 2);
+					int start3 = int(size[i] / 2);
+					int stop3 = int(size[i] - floor(size[i] / 4));
+					int start4 = int(size[i] - floor(size[i] / 4));
+					int stop4 = size[i];
+					thread th1([&]() { LayersCleaner(i, start1, stop1);  });
+					thread th2([&]() { LayersCleaner(i, start2, stop2);  });
+					thread th3([&]() { LayersCleaner(i, start3, stop3);  });
+					thread th4([&]() { LayersCleaner(i, start4, stop4);  });
+					th1.join();
+					th2.join();
+					th3.join();
+					th4.join();
+				}
+
+				if (threadsNum == 1) {
+					thread th1([&]() {
+						ForwardFeeder(i, 0, size[i]);
+						});
+					th1.join();
+				}
+
+				if (threadsNum == 2) {
+					thread.th1([&]() {
+						ForwardFeeder(i, 0, int(floor(size[i] / 2)));
+						});
+					thread.th2([&]() {
+						ForwardFeeder(i, int(floor(size[i] / 2)),size[i]);
+						});
+					th1.join();
+					th2.join();
+				}
+
+				if (threadsNum == 4)
+				{
+					if (size[i] == 2 || size[i] == 3) {
+						thread.th1([&]() {
+							ForwardFeeder(i, 0, int(floor(size[i] / 2)));
+							});
+						thread.th2([&]() {
+							ForwardFeeder(i, int(floor(size[i] / 2, size[i])));
+							});
+						th1.join();
+						th2.join();
+					}
+					if (size[i] >= 4) {
+						int start1 = 0;
+						int stop1 = int(size[i] / 4);
+						int start2 = int(size[i] / 4);
+						int stop2 = int(size[i] / 2);
+						int start3 = int(size[i] / 2);
+						int stop3 = int(size[i] - floor(size[i] / 4));
+						int start4 = int(size[i] - floor(size[i] / 4));
+						int stop4 = size[i];
+						thread th1([&]() { ForwardFeeder(i, start1, stop1);  });
+						thread th2([&]() { ForwardFeeder(i, start2, stop2);  });
+						thread th3([&]() { ForwardFeeder(i, start3, stop3);  });
+						thread th4([&]() { ForwardFeeder(i, start4, stop4);  });
+						th1.join();
+						th2.join();
+						th3.join();
+						th4.join();
+
+					}
+				}
+			}
+		}
+		double max = 0;
+		double prediction = 0;
+		for (int i = 0; i < size[layers - 1]; i++) {
+			if (neurons[layers - 1][i].value > max) {
+				max = neurons[layers - 1][i].value;
+				prediction = i;
+			}
+		}
+		return prediction;
 	}
 
 };
