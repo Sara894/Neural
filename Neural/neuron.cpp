@@ -1,4 +1,4 @@
- #include <fstream>
+#include <fstream>
 #include <thread>//сетка многопоточная будет
 #include <random>//случайные числа
 #include <time.h>
@@ -77,7 +77,7 @@ public:
 			}
 		}
 	}
-	
+
 	//принимает входные значения нейросети
 	void setInput(double* p)
 	{
@@ -92,7 +92,7 @@ public:
 	void Show()
 	{
 		setlocale(LC_ALL, "ru");
-		cout << "Количество ядер процессора: " <<thread::hardware_concurrency << endl;
+		cout << "Количество ядер процессора: " << thread::hardware_concurrency << endl;
 		cout << "Нейронная сеть имеет архитектуру: ";
 		for (int i = 0; i < layers; i++)
 		{
@@ -105,7 +105,7 @@ public:
 		cout << endl;
 		for (int i = 0; i < layers; i++)
 		{
-			cout << "\n #Слой " << i + 1 <<"\n\n";
+			cout << "\n #Слой " << i + 1 << "\n\n";
 			for (int j = 0; j < size[i]; j++)
 			{
 				cout << "Нейрон #" << j + 1 << ":\n";
@@ -200,9 +200,9 @@ public:
 				{
 					cout << "4 ядра это не про мой комп)))" << endl;
 					int start1 = 0;
-					int stop1 =  int(size[i] / 4);
+					int stop1 = int(size[i] / 4);
 					int start2 = int(size[i] / 4);
-					int stop2 =  int(size[i] / 2);
+					int stop2 = int(size[i] / 2);
 					int start3 = int(size[i] / 2);
 					int stop3 = int(size[i] - floor(size[i] / 4));
 					int start4 = int(size[i] - floor(size[i] / 4));
@@ -229,7 +229,7 @@ public:
 						ForwardFeeder(i, 0, int(floor(size[i] / 2)));
 						});
 					thread.th2([&]() {
-						ForwardFeeder(i, int(floor(size[i] / 2)),size[i]);
+						ForwardFeeder(i, int(floor(size[i] / 2)), size[i]);
 						});
 					th1.join();
 					th2.join();
@@ -311,6 +311,118 @@ public:
 		for (int j = start; j < stop; j++) {
 			for (int k = 0; k < size[i + 1]; k++) {
 				weights[i][j][k] += lr * neurons[i + 1][k].error * sigm_pro(neurons[i + 1][k].value) * neurons[i][j].value;
+			}
+		}
+	}
+
+	//производит процесс BackPropogation
+	void BackPropogation(double prediction, double rresult, double lr) {
+		for (int i = layers - 1; i > 0; i--) {
+			if (threadsNum == 1) {
+				if (i = layers - 1) {
+					for (int j = 0; j < size[i]; j++) {
+						if (j != int(rresult)) {
+							neurons[i][j].error = -(neurons[i][j].value);
+						}
+						else {
+							neurons[i][j].error = 1.0 - (neurons[i][j].value);
+						}
+					}
+				}
+				else {
+					for (int j = 0; j < size[i]; j++) {
+						double error = 0.0;
+						for (int k = 0; k < size[i + 1]; k++) {
+							error += neurons[i + 1][k].error * weights[i][j][k];
+						}
+						neurons[i][j].error = error;
+					}
+				}
+			}
+
+			if (threadsNum == 2) {
+				thread th1([&]() {
+					ErrorCounter(i, 0, int(size[i] / 2), prediction, rresult, lr);
+					});
+				thread th2([&]() {
+					ErrorCounter(i, int(size[i] / 2), size[i], prediction, rresult, lr);
+					});
+				th1.join();
+				th2.join();
+			}
+
+			if (threadsNum == 4) {
+				if (size[i] < 4) {
+					if (i == layers - 1) {
+						for (int j = 0; j < size[i]; j++) {
+							if (j != int(rresult)) {
+								neurons[i][j].error = -(neurons[i][j].value);
+							}
+							else {
+								neurons[i][j].error = 1.0 - (neurons[i][j].value);
+							}
+						}
+					}
+					else {
+						for (int j = 0; j < size[i]; j++) {
+							double error = 0.0;
+							for (int k = 0; k < size[i + 1]; k++) {
+								error += neurons[i + 1][k].error * weights[i][j][k];
+							}
+							neurons[i][j].error = error;
+						}
+					}
+				}
+
+				if (size[i] >= 4) {
+					int start1 = 0;
+					int stop1 = int(size[i] / 4);
+					int start2 = int(size[i] / 4);
+					int stop2 = int(size[i] / 2);
+					int start3 = int(size[i] / 2);
+					int stop3 = int(size[i] - floor(size[i] / 4));
+					int start4 = int(size[i] - floor(size[i] / 4));
+					int stop4 = size[i];
+					thread th1([&]() { ErrorCounter(i, start1, stop1, prediction, rresult, lr);  });
+					thread th2([&]() { ErrorCounter(i, start2, stop2, prediction, rresult, lr);  });
+					thread th3([&]() { ErrorCounter(i, start3, stop3, prediction, rresult, lr);  });
+					thread th4([&]() { ErrorCounter(i, start4, stop4, prediction, rresult, lr);  });
+					th1.join();
+					th2.join();
+					th3.join();
+					th4.join();
+				}
+			}
+		}
+
+		for (int i = 0; i < layers - 1; i++) {
+			if (threadsNum == 1) {
+				for (int j = 0; j < size[i]; j++) {
+					for (int k = 0; k < size[i + 1]; k++) {
+						weights[i][j][k] += lr * neurons[i + 1][k].error * sigm_pro(neurons[i + 1][k].value) * neurons[i][j].value;
+					}
+				}
+			}
+
+			if (threadsNum == 2) {
+				thread th1([&]() {
+					WeightsUpdater(0, int(size[i] / 2), i, lr);
+					});
+				thread th2([&]() {
+					WeightsUpdater(int(size[i] / 2), size[i], i, lr);
+					});
+				th1.join();
+				th2.join();
+			}
+
+			if (threadsNum == 4) {
+				if (size[i] < 4) {
+					for (int j = 0; j < size[i]; j++) {
+						for (int k = 0; k < size[i + 1]; k++) {
+							weights[i][j][k] += lr * neurons[i + 1][k].error * sigm_pro(neurons[i + 1][k].value) * neurons[i][j].value;
+						}
+					}
+				}
 			}
 		}
 	}
