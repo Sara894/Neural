@@ -427,4 +427,22 @@ public:
 		}
 	}
 
+	bool SaveWeights() {
+		ofstream fout;
+		fout.open("weights.text");
+		for (int i = 0; i < layers; i++) {
+			if (i < layers - 1) {
+				for (int j = 0; j < size[i]; j++) {
+					for (int k = 0; k < size[i + 1]; k++) {
+						fout << weights[i][j][k]<<" ";
+
+					}
+				}
+			}
+		}
+
+		fout.close();
+		return 1;
+	}
+
 };
