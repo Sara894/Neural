@@ -51,6 +51,30 @@ public:
 		}
 	}
 
+	void setLayersNotStudy(int n, int* p , string filename) {
+		ifstream fin;
+		fin.open(filename);
+		srand(time(0));
+		layers = n;
+		neurons = new neuron * [n];
+		weights = new double** [n - 1];
+		size = new int[n];
+		for (int i = 0; i < n; i++) {
+			size[i] = p[i];
+			neurons[i] = new neuron[p[i]];
+			if (i < n - 1) {
+				weights[i] = new double* [p[i]];
+				for (int j = 0; j < p[i]; j++) {
+					weights[i][j] = new double[p[i + 1]];
+					for (int k = 0; k < p[i + 1]; k++) {
+						fin >> weights[i][j][k];
+					}
+				}
+			}
+		}
+
+	}
+
 	//одна из самых важных функций, SetLayers
 	void setLayers(int n, int* p)//массив size
 	{
